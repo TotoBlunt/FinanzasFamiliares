@@ -5,7 +5,7 @@ from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_di
 from utils.func_dash import graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
 
 # --- CONEXIÓN A GOOGLE SHEETS ---
-client = conexion_gsheet()  # Establece la conexión con Google Sheets
+client = conexion_gsheet_produccion()  # Establece la conexión con Google Sheets
 worksheet = abrir_hoja(client)  # Abre la hoja de cálculo específica
 # --- INTERFAZ DE USUARIO DE STREAMLIT ---
 st.set_page_config(page_title="Gestor de Finanzas", layout="wide")
