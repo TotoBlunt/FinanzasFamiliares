@@ -2,23 +2,36 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 import pandas as pd
 
-def conexion_gsheet():
+def conexion_gsheet_produccion():
     """
-    Esta función establece una conexión con Google Sheets usando gspread y las credenciales de un archivo JSON.
-    Asegúrate de tener el archivo 'credential_gsheet.json' en la misma carpeta que este script.
+    Establece conexión con Google Sheets usando los Secretos de Streamlit.
+    Esta función está diseñada para ser usada exclusivamente en un entorno
+    desplegado en Streamlit Community Cloud.
     """
-    # 1. Definir el 'alcance' (scope) de los permisos
-    # Esto le dice a Google qué APIs puede usar nuestra conexión.
+    # 1. Definir el alcance de los permisos
     scope = ["https://spreadsheets.google.com/feeds", 'https://www.googleapis.com/auth/spreadsheets',
-            "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+             "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
 
-    # 2. Cargar las credenciales desde el archivo JSON
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credential_gsheet.json", scope)
-
-    # 3. Autorizar al cliente de gspread
-    client = gspread.authorize(creds)
-
-    return client
+    try:
+        # 2. Cargar las credenciales directamente desde los secretos de Streamlit
+        # st.secrets es un diccionario especial que contiene lo que configuraste en la nube.
+        creds_dict = st.secrets["gcp_service_account"]
+        
+        # 3. Autorizar usando el diccionario de credenciales
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+        
+        return client
+        
+    except KeyError:
+        # Este error ocurre si la sección [gcp_service_account] no está en los secretos.
+        st.error("Error de configuración: La sección [gcp_service_account] no se encontró en los secretos de Streamlit.")
+        st.info("Asegúrate de haber configurado correctamente los secretos en tu dashboard de Streamlit Community Cloud.")
+        return None
+    except Exception as e:
+        # Captura cualquier otro error durante la autorización
+        st.error(f"No se pudo conectar a Google Sheets. Error inesperado: {e}")
+        return None
 
 def abrir_hoja(client):
     """
