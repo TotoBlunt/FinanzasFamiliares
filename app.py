@@ -153,12 +153,12 @@ else:
                     col1, col2, col3 = st.columns([3, 2, 1.5])
                     
                     with col1:
-                        st.text(f"📝 {row['Descripción']}")
+                        st.text(f"📝 {row['Descripcion']}")
                         st.caption(f"📅 {row['Fecha'].strftime('%d/%m/%Y')} | 👤 {row['Persona']}")
                     
                     with col2:
                         st.text(f"💵 ${row['Monto']:.2f}")
-                        st.caption(f"🔖 {row['Categoría']}")
+                        st.caption(f"🔖 {row['Categoria']}")
                     
                     with col3:
                         # Usamos un expander como paso de confirmación
