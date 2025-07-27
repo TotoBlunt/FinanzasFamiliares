@@ -101,6 +101,9 @@ else:
     # --- SECCIÓN 2: VISUALIZACIONES CLAVE (LADO A LADO) ---
     st.subheader("Visión General de Gastos")
     col1, col2 = st.columns(2)
+
+    # --- SECCIÓN 3: ANÁLISIS DETALLADO (EN PESTAÑAS) ---
+    st.subheader("Análisis y Gestión")
     
     with col1:
         # Llamamos a la función del gráfico de torta
@@ -118,7 +121,8 @@ else:
     tab1, tab2, tab3 = st.tabs([
         "👥 Comparativa por Persona", 
         "🌳 Detalle por Subcategoría", 
-        "📄 Tabla de Datos"
+        "📄 Tabla de Datos",
+         "⚙️ Gestionar Gastos"
     ])
 
     with tab1:
@@ -132,3 +136,41 @@ else:
     with tab3:
         # Llamamos a la función que muestra la tabla de datos
         mostrar_tabla_detallada(df_filtrado)
+
+    with tab4: # <-- LÓGICA DE LA NUEVA PESTAÑA
+        st.write("#### Eliminar un gasto registrado")
+        st.warning("⚠️ ¡Atención! La eliminación de un gasto es permanente.", icon="🔥")
+
+        # Mostramos los 15 gastos más recientes del DataFrame filtrado
+        gastos_recientes = df_filtrado.sort_values(by="Fecha", ascending=False).head(15)
+        
+        if gastos_recientes.empty:
+            st.info("No hay gastos para mostrar según los filtros actuales.")
+        else:
+            for index, row in gastos_recientes.iterrows():
+                # Creamos un contenedor para cada gasto para una mejor organización visual
+                with st.container():
+                    col1, col2, col3 = st.columns([3, 2, 1.5])
+                    
+                    with col1:
+                        st.text(f"📝 {row['Descripción']}")
+                        st.caption(f"📅 {row['Fecha'].strftime('%d/%m/%Y')} | 👤 {row['Persona']}")
+                    
+                    with col2:
+                        st.text(f"💵 ${row['Monto']:.2f}")
+                        st.caption(f"🔖 {row['Categoría']}")
+                    
+                    with col3:
+                        # Usamos un expander como paso de confirmación
+                        with st.expander("Eliminar"):
+                            # El botón de confirmación necesita una clave única
+                            if st.button("🚨 Confirmar Eliminación", key=f"del_{row['ID_Gasto']}"):
+                                exito, mensaje = eliminar_gasto(worksheet, row['ID_Gasto'])
+                                
+                                if exito:
+                                    st.success(mensaje)
+                                    # Forzamos un re-run de la app para que la lista se actualice
+                                    st.experimental_rerun()
+                                else:
+                                    st.error(mensaje)
+                    st.markdown("---")
