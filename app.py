@@ -157,7 +157,7 @@ else:
                 id_gasto = row['ID_Gasto']
                 
                 # Creamos un expander para cada gasto. El título muestra info clave.
-                with st.expander(f"📝 {row['Descripción']} | 💵 ${row['Monto']:.2f} | 📅 {row['Fecha'].strftime('%d/%m/%Y')}"):
+                with st.expander(f"📝 {row['Descripcion']} | 💵 ${row['Monto']:.2f} | 📅 {row['Fecha'].strftime('%d/%m/%Y')}"):
                     
                     # 3. Formulario de EDICIÓN dentro del expander
                     with st.form(key=f"edit_form_{id_gasto}"):
@@ -168,11 +168,11 @@ else:
                         with col_form1:
                             nueva_fecha = st.date_input("Fecha", value=row['Fecha'].date(), key=f"date_{id_gasto}")
                             nuevo_monto = st.number_input("Monto", value=float(row['Monto']), format="%.2f", key=f"monto_{id_gasto}")
-                            nueva_categoria = st.selectbox("Categoría", CATEGORIAS, index=CATEGORIAS.index(row['Categoría']) if row['Categoría'] in CATEGORIAS else 0, key=f"cat_{id_gasto}")
+                            nueva_categoria = st.selectbox("Categoría", CATEGORIAS, index=CATEGORIAS.index(row['Categoria']) if row['Categoria'] in CATEGORIAS else 0, key=f"cat_{id_gasto}")
                         
                         with col_form2:
-                            nueva_descripcion = st.text_input("Descripción", value=row['Descripción'], key=f"desc_{id_gasto}")
-                            nueva_subcategoria = st.text_input("Subcategoría", value=row['Subcategoría'], key=f"subcat_{id_gasto}")
+                            nueva_descripcion = st.text_input("Descripción", value=row['Descripcion'], key=f"desc_{id_gasto}")
+                            nueva_subcategoria = st.text_input("Subcategoría", value=row['Subcategoria'], key=f"subcat_{id_gasto}")
                             nueva_persona = st.selectbox("Persona", PERSONAS, index=PERSONAS.index(row['Persona']) if row['Persona'] in PERSONAS else 0, key=f"pers_{id_gasto}")
 
                         # Botones de acción del formulario
@@ -189,9 +189,9 @@ else:
                         datos_actualizados = {
                             'Fecha': nueva_fecha.strftime('%Y-%m-%d'),
                             'Monto': nuevo_monto,
-                            'Descripción': nueva_descripcion,
-                            'Categoría': nueva_categoria,
-                            'Subcategoría': nueva_subcategoria,
+                            'Descripcion': nueva_descripcion,
+                            'Categoria': nueva_categoria,
+                            'Subcategoria': nueva_subcategoria,
                             'Persona': nueva_persona
                         }
                         exito, mensaje = editar_gasto(worksheet, id_gasto, datos_actualizados)
