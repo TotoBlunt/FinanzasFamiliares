@@ -197,7 +197,7 @@ else:
                         exito, mensaje = editar_gasto(worksheet, id_gasto, datos_actualizados)
                         if exito:
                             st.success(mensaje)
-                            st.experimental_rerun()
+                            st.rerun()
                         else:
                             st.error(mensaje)
                     
@@ -206,6 +206,6 @@ else:
                         exito, mensaje = eliminar_gasto(worksheet, id_gasto)
                         if exito:
                             st.success(mensaje)
-                            st.experimental_rerun()
+                            st.rerun()
                         else:
                             st.error(mensaje)
