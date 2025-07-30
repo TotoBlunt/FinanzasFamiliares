@@ -1,4 +1,5 @@
 from datetime import datetime
+import streamlit as st
 
 def ingresar_gasto(worksheet, fecha, monto, descripcion, persona, categoria, subcategoria, tipo_gasto, notas):
     """
@@ -121,5 +122,5 @@ def editar_gasto(worksheet, id_gasto, nuevos_datos):
     except Exception as e:
         # Imprimimos el error real para una fácil depuración
         error_message = f"Ocurrió un error inesperado al editar: {e}"
-        print(error_message) 
+        st.write(error_message) 
         return (False, "Ocurrió un error inesperado. Revisa la terminal para más detalles.")
