@@ -1,6 +1,6 @@
 from datetime import datetime
 import streamlit as st
-
+import gspread
 def ingresar_gasto(worksheet, fecha, monto, descripcion, persona, categoria, subcategoria, tipo_gasto, notas):
     """
     Ingresa una nueva fila de gasto en la hoja de cálculo especificada.
