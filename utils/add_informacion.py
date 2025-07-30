@@ -86,3 +86,45 @@ def eliminar_gasto(worksheet, id_gasto):
         error_message = f"Ocurrió un error inesperado al eliminar: {e}"
         print(error_message)
         return (False, "Ocurrió un error inesperado.")
+
+def editar_gasto(worksheet, id_gasto, nuevos_datos):
+    """
+    Encuentra una fila por su ID_Gasto y actualiza sus celdas con nuevos datos.
+
+    Args:
+        worksheet (gspread.Worksheet): El objeto de la hoja de cálculo.
+        id_gasto (str): El ID único del gasto que se desea editar.
+        nuevos_datos (dict): Un diccionario con las columnas a actualizar y sus nuevos valores.
+                             Ej: {'Monto': 15.50, 'Descripción': 'Nuevo café'}
+
+    Returns:
+        tuple: Una tupla (bool, str) indicando el éxito (True/False) y un mensaje.
+    """
+    try:
+        # Encontrar la fila del gasto
+        cell = worksheet.find(id_gasto, in_column=1)
+        if cell is None:
+            return (False, f"Error: No se encontró el gasto con ID {id_gasto}.")
+
+        fila_a_editar = cell.row
+        
+        # Obtenemos los encabezados para saber el número de columna de cada campo
+        encabezados = worksheet.row_values(1)
+        
+        # Creamos una lista de celdas a actualizar para hacerlo en un solo batch
+        celdas_a_actualizar = []
+        for campo, valor in nuevos_datos.items():
+            if campo in encabezados:
+                columna_a_editar = encabezados.index(campo) + 1
+                celdas_a_actualizar.append(gspread.Cell(fila_a_editar, columna_a_editar, str(valor)))
+            
+        if celdas_a_actualizar:
+            worksheet.update_cells(celdas_a_actualizar)
+            return (True, f"¡Gasto con ID {id_gasto} actualizado exitosamente!")
+        else:
+            return (False, "No se proporcionaron datos válidos para actualizar.")
+
+    except Exception as e:
+        error_message = f"Ocurrió un error inesperado al editar: {e}"
+        print(error_message)
+        return (False, "Ocurrió un error inesperado.")

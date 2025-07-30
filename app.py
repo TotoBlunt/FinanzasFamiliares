@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_datos
-from utils.add_informacion import ingresar_gasto,eliminar_gasto
+from utils.add_informacion import ingresar_gasto,eliminar_gasto,editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal
 from utils.func_dash import graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
 
@@ -52,9 +52,9 @@ if submitted:
         descripcion=descripcion_gasto,
         persona=persona_gasto,
         categoria=categoria_gasto,
-        subcategoria=subcategoria_gasto,      # <-- NUEVO
-        tipo_gasto=tipo_gasto_seleccionado,  # <-- NUEVO
-        notas=notas_gasto                    # <-- NUEVO
+        subcategoria=subcategoria_gasto,     
+        tipo_gasto=tipo_gasto_seleccionado,  
+        notas=notas_gasto                    
     )
     
     # Mostramos el mensaje de éxito o error
@@ -138,39 +138,50 @@ else:
         mostrar_tabla_detallada(df_filtrado)
 
     with tab4: # <-- LÓGICA DE LA NUEVA PESTAÑA
-        st.write("#### Eliminar un gasto registrado")
-        st.warning("⚠️ ¡Atención! La eliminación de un gasto es permanente.", icon="🔥")
+         st.write("#### Gestionar gastos registrados")
+    
+    # ... (código para mostrar gastos recientes) ...
+    for index, row in gastos_recientes.iterrows():
+        with st.expander(f"📝 {row['Descripción']} - ${row['Monto']:.2f}"):
+            # Usamos un formulario para la edición
+            with st.form(key=f"edit_form_{row['ID_Gasto']}"):
+                st.write(f"**Editando Gasto ID:** `{row['ID_Gasto']}`")
+                
+                # Campos pre-rellenados con los datos actuales
+                nuevo_monto = st.number_input("Monto", value=float(row['Monto']), format="%.2f")
+                nueva_descripcion = st.text_input("Descripción", value=row['Descripcion'])
+                nueva_categoria = st.text_input("Categoría", value=row['Categoria'])
+                # ... (añadir aquí otros campos que quieras que sean editables: categoría, fecha, etc.)
 
-        # Mostramos los 15 gastos más recientes del DataFrame filtrado
-        gastos_recientes = df_filtrado.sort_values(by="Fecha", ascending=False).head(15)
-        
-        if gastos_recientes.empty:
-            st.info("No hay gastos para mostrar según los filtros actuales.")
-        else:
-            for index, row in gastos_recientes.iterrows():
-                # Creamos un contenedor para cada gasto para una mejor organización visual
-                with st.container():
-                    col1, col2, col3 = st.columns([3, 2, 1.5])
-                    
-                    with col1:
-                        st.text(f"📝 {row['Descripcion']}")
-                        st.caption(f"📅 {row['Fecha'].strftime('%d/%m/%Y')} | 👤 {row['Persona']}")
-                    
-                    with col2:
-                        st.text(f"💵 ${row['Monto']:.2f}")
-                        st.caption(f"🔖 {row['Categoria']}")
-                    
-                    with col3:
-                        # Usamos un expander como paso de confirmación
-                        with st.expander("Eliminar"):
-                            # El botón de confirmación necesita una clave única
-                            if st.button("🚨 Confirmar Eliminación", key=f"del_{row['ID_Gasto']}"):
-                                exito, mensaje = eliminar_gasto(worksheet, row['ID_Gasto'])
-                                
-                                if exito:
-                                    st.success(mensaje)
-                                    # Forzamos un re-run de la app para que la lista se actualice
-                                    st.experimental_rerun()
-                                else:
-                                    st.error(mensaje)
-                    st.markdown("---")
+                # Botones de acción dentro del formulario
+                col1, col2, _ = st.columns([1, 1, 3])
+                
+                with col1:
+                    submitted = st.form_submit_button("💾 Guardar Cambios")
+                
+                with col2:
+                    # Botón de eliminar (también dentro del formulario para coherencia)
+                    if st.form_submit_button("🗑️ Eliminar", help="Eliminar este gasto permanentemente"):
+                        exito, mensaje = eliminar_gasto(worksheet, row['ID_Gasto'])
+                        if exito:
+                            st.success(mensaje)
+                            st.experimental_rerun()
+                        else:
+                            st.error(mensaje)
+
+            if submitted:
+                # Recolectar los datos actualizados
+                datos_actualizados = {
+                    'Monto': nuevo_monto,
+                    'Descripción': nueva_descripcion
+                    # ... (añadir aquí los otros campos del formulario)
+                }
+                
+                # Llamar a la función de edición
+                exito, mensaje = editar_gasto(worksheet, row['ID_Gasto'], datos_actualizados)
+                
+                if exito:
+                    st.success(mensaje)
+                    st.experimental_rerun()
+                else:
+                    st.error(mensaje)
