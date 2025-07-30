@@ -154,7 +154,7 @@ else:
         else:
             # 2. Iteramos sobre el DataFrame ya definido.
             for index, row in gastos_a_gestionar.iterrows():
-                id_gasto = row['ID_Gasto']
+                id_gasto = str(row['ID_Gasto'])
                 
                 # Creamos un expander para cada gasto. El título muestra info clave.
                 with st.expander(f"📝 {row['Descripcion']} | 💵 ${row['Monto']:.2f} | 📅 {row['Fecha'].strftime('%d/%m/%Y')}"):
