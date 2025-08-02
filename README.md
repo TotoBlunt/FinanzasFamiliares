@@ -5,8 +5,8 @@
 
 Herramienta completa para la gestión de finanzas personales en pareja, construida con Python y Streamlit. Permite un registro detallado de gastos y ofrece un dashboard interactivo para un análisis profundo, con toda la información centralizada en Google Sheets.
 
-**[➡️ Ver la aplicación en vivo] <img width="1040" height="1707" alt="image" src="https://github.com/user-attachments/assets/5c257647-9954-4353-b56e-bfb863fa72f2" />
-** 
+[➡️ Ver la aplicación en vivo] <img width="1040" height="1707" alt="image" src="https://github.com/user-attachments/assets/5c257647-9954-4353-b56e-bfb863fa72f2" />
+
 
 
 ---
