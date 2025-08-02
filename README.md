@@ -135,3 +135,9 @@ Sigue estos pasos para poner en marcha tu propia versión de la aplicación.
 *   [ ] **Categorización con IA:** Sugerir categorías automáticamente a partir de la descripción del gasto.
 *   [ ] **Autenticación de Usuarios:** Añadir un sistema de login para que solo tú y tu esposa puedan acceder.
 *   [ ] **Soporte Multimoneda:** Para registrar gastos en diferentes divisas.
+
+---
+
+## 📜 Licencia
+
+Este proyecto está distribuido bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
