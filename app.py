@@ -5,22 +5,26 @@ import streamlit as st
 import pandas as pd
 from openai import OpenAI
 
-# Importar funciones desde la carpeta 'utils'
-# Asegúrate de que tu estructura de carpetas es correcta:
-# .
-# ├── app.py
-# └── utils
-#     ├── __init__.py  (un archivo vacío)
-#     ├── conn_Gsheet.py
-#     ├── add_informacion.py
-#     ├── func_dash.py
-#     └── func_openai.py
-#
 from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_datos
 from utils.add_informacion import ingresar_gasto, eliminar_gasto, editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal, graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
 from utils.func_openai import sugerir_categoria_ia, generar_resumen_ia
 
+# ==============================================================================
+# LÍNEAS DE DEPURACIÓN TEMPORALES
+# ==============================================================================
+st.header("🕵️‍♂️ Depuración de Secretos (Eliminar antes de finalizar)")
+if st.button("Mostrar Secretos"):
+    st.write("Claves encontradas en st.secrets:")
+    # st.secrets se comporta como un diccionario, .keys() nos muestra todas las claves que encontró
+    st.write(st.secrets.keys())
+
+    # Verificamos si la clave específica existe
+    if "OPENAI_API_KEY" in st.secrets:
+        st.success("¡Éxito! La clave 'OPENAI_API_KEY' fue encontrada.")
+    else:
+        st.error("¡Error! La clave 'OPENAI_API_KEY' NO fue encontrada en los secretos.")
+st.markdown("---")
 # ==============================================================================
 # 2. CONFIGURACIÓN DE LA PÁGINA Y CONSTANTES
 # ==============================================================================
