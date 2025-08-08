@@ -3,6 +3,15 @@ from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_dat
 from utils.add_informacion import ingresar_gasto,eliminar_gasto,editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal
 from utils.func_dash import graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
+from openai import OpenAI
+
+# --- INICIALIZAR CLIENTES ---
+# Cliente de OpenAI
+try:
+    client_openai = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+except Exception as e:
+    # Si la clave no está, no rompemos la app, solo la funcionalidad de IA no estará disponible.
+    client_openai = None
 
 # --- CONEXIÓN A GOOGLE SHEETS ---
 client = conexion_gsheet_produccion()  # Establece la conexión con Google Sheets
