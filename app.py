@@ -23,32 +23,32 @@ st.set_page_config(page_title="Gestor de Finanzas", layout="wide")
 st.title("Nuestro Gestor de Finanzas  Familiares 📊")
 #--- Formulario para añadir gastos ---
 with st.form("entry_form_1", clear_on_submit=True):
-st.header("Añadir un nuevo gasto")
-# Definir categorías y personas
-CATEGORIAS = ["Comida", "Hogar", "Transporte", "Ocio", "Salud", "Ropa y Calzado", "Tecnología", "Otro"] 
-PERSONAS = ["Milagros Valladolid", "Jose Longa"] # Lista de personas que pueden registrar gastos
-TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversión", "Deuda"]
+    st.header("Añadir un nuevo gasto")
+    # Definir categorías y personas
+    CATEGORIAS = ["Comida", "Hogar", "Transporte", "Ocio", "Salud", "Ropa y Calzado", "Tecnología", "Otro"] 
+    PERSONAS = ["Milagros Valladolid", "Jose Longa"] # Lista de personas que pueden registrar gastos
+    TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversión", "Deuda"]
 
-# Usaremos columnas para organizar mejor el formulario
-col1, col2 = st.columns(2)
+    # Usaremos columnas para organizar mejor el formulario
+    col1, col2 = st.columns(2)
 
-with col1:
-    fecha_gasto = st.date_input("Fecha")
-    descripcion_gasto = st.text_input("Descripción (Obligatorio)", placeholder="En que gastaste el dinero?")
-    categoria_gasto = st.selectbox("Categoría", CATEGORIAS)
-    # NUEVO CAMPO: Subcategoría
-    subcategoria_gasto = st.text_input("Subcategoría (Opcional)", placeholder="Ej: Supermercado, Gasolina, Netflix")
+    with col1:
+        fecha_gasto = st.date_input("Fecha")
+        descripcion_gasto = st.text_input("Descripción (Obligatorio)", placeholder="En que gastaste el dinero?")
+        categoria_gasto = st.selectbox("Categoría", CATEGORIAS)
+        # NUEVO CAMPO: Subcategoría
+        subcategoria_gasto = st.text_input("Subcategoría (Opcional)", placeholder="Ej: Supermercado, Gasolina, Netflix")
 
-with col2:
-    monto_gasto = st.number_input("Monto (Obligatorio)", min_value=0.01, format="%.2f", placeholder="")
-    persona_gasto = st.radio("Pagado por", PERSONAS)
-    # NUEVO CAMPO: Tipo de Gasto
-    tipo_gasto_seleccionado = st.selectbox("Tipo de Gasto", TIPOS_GASTO)
+    with col2:
+        monto_gasto = st.number_input("Monto (Obligatorio)", min_value=0.01, format="%.2f", placeholder="")
+        persona_gasto = st.radio("Pagado por", PERSONAS)
+        # NUEVO CAMPO: Tipo de Gasto
+        tipo_gasto_seleccionado = st.selectbox("Tipo de Gasto", TIPOS_GASTO)
 
-# NUEVO CAMPO: Notas (debajo de las columnas para que ocupe todo el ancho)
-notas_gasto = st.text_area("Notas (Opcional)", placeholder="Añade cualquier detalle extra aquí")
+    # NUEVO CAMPO: Notas (debajo de las columnas para que ocupe todo el ancho)
+    notas_gasto = st.text_area("Notas (Opcional)", placeholder="Añade cualquier detalle extra aquí")
 
-submitted = st.form_submit_button("✅ Agregar Gasto")
+    submitted = st.form_submit_button("✅ Agregar Gasto")
 #--- Lógica de envío actualizada ---
 if submitted:
     # Llamamos a nuestra función actualizada, pasándole TODOS los datos del formulario
