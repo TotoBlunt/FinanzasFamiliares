@@ -1,4 +1,4 @@
-
+import streamlit as st
 def sugerir_categoria_ia(descripcion, categorias_posibles, cliente_openai):
     """
     Usa la IA para sugerir una categoría basada en la descripción de un gasto.
@@ -32,7 +32,7 @@ def sugerir_categoria_ia(descripcion, categorias_posibles, cliente_openai):
             return "Otro" # Si la IA devuelve algo inesperado, asignamos "Otro"
             
     except Exception as e:
-        print(f"Error al llamar a la API de OpenAI para sugerir categoría: {e}")
+        st.write(f"Error al llamar a la API de OpenAI para sugerir categoría: {e}")
         return None
 
 def generar_resumen_ia(df_filtrado, cliente_openai):
@@ -76,5 +76,5 @@ def generar_resumen_ia(df_filtrado, cliente_openai):
         )
         return response.choices[0].message.content
     except Exception as e:
-        print(f"Error al llamar a la API de OpenAI para generar resumen: {e}")
+        st.write(f"Error al llamar a la API de OpenAI para generar resumen: {e}")
         return "Ocurrió un error al intentar generar el resumen. Por favor, inténtalo de nuevo más tarde."
