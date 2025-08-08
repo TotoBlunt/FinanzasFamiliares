@@ -57,6 +57,7 @@ client_gsheet = conexion_gsheet_produccion()
 if client_gsheet is None:
     st.error("No se pudo conectar a Google Sheets. La aplicación no puede continuar.")
     st.stop()
+worksheet = abrir_hoja(client)
 #=================================================================
 # 4. CUERPO PRINCIPAL DE LA APLICACIÓN
 # ==============================================================================
