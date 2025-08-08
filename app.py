@@ -72,7 +72,7 @@ else:
 
 #--- INICIO DEL DASHBOARD ---
 st.header("Análisis y Visualización de Gastos 📈")
-Cargar los datos una sola vez
+#Cargar los datos una sola vez
 df_original = cargar_datos(worksheet)
 if df_original.empty:
     st.info("Aún no hay datos para mostrar. ¡Agrega tu primer gasto para comenzar!")
