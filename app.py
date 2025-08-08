@@ -21,13 +21,13 @@ if st.button("Revelar Estructura de Secretos"):
         st.write(st.secrets.to_dict())
 
         # Verificación explícita de la clave de OpenAI en el nivel superior
-        if "OPENAI_API_KEY" in st.secrets:
+        if "api_key" in st.secrets:
             st.success("¡ÉXITO! 'OPENAI_API_KEY' encontrada en el nivel superior.")
         else:
             st.error("¡FALLO! 'OPENAI_API_KEY' NO encontrada en el nivel superior.")
 
         # Verificación de la clave de OpenAI anidada
-        if "gcp_service_account" in st.secrets and "OPENAI_API_KEY" in st.secrets.gcp_service_account:
+        if "gcp_service_account" in st.secrets and "api_key" in st.secrets.gcp_service_account:
             st.warning("¡ALERTA! 'OPENAI_API_KEY' fue encontrada ANIDADA dentro de 'gcp_service_account'. ¡Esto es incorrecto!")
         
     except Exception as e:
