@@ -50,19 +50,14 @@ TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversió
 # 3. INICIALIZACIÓN DE CLIENTES Y CONEXIONES
 # ==============================================================================
 
-
+client_openai = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY")) if st.secrets.get("OPENAI_API_KEY") else None
 
 # --- Conexión a Google Sheets ---
 client_gsheet = conexion_gsheet_produccion()
 if client_gsheet is None:
     st.error("No se pudo conectar a Google Sheets. La aplicación no puede continuar.")
     st.stop()
-
-worksheet = abrir_hoja(client_gsheet)
-if worksheet is None:
-    st.error("No se pudo abrir la hoja de trabajo. La aplicación no puede continuar.")
-    st.stop()
-# ==============================================================================
+=================================================================
 # 4. CUERPO PRINCIPAL DE LA APLICACIÓN
 # ==============================================================================
 
