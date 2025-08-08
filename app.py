@@ -9,32 +9,7 @@ from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_dat
 from utils.add_informacion import ingresar_gasto, eliminar_gasto, editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal, graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
 from utils.func_openai import sugerir_categoria_ia, generar_resumen_ia
-'''
-# ==============================================================================
-# DEPURADOR DEFINITIVO DE SECRETOS (Eliminar al finalizar)
-# ==============================================================================
-st.header("🕵️‍♂️ Depurador Definitivo de Secretos")
-if st.button("Revelar Estructura de Secretos"):
-    try:
-        # Esto imprimirá todo el diccionario de secretos que Streamlit está viendo.
-        st.write("Estructura completa de `st.secrets`:")
-        st.write(st.secrets.to_dict())
 
-        # Verificación explícita de la clave de OpenAI en el nivel superior
-        if "api_key" in st.secrets:
-            st.success("¡ÉXITO! 'OPENAI_API_KEY' encontrada en el nivel superior.")
-        else:
-            st.error("¡FALLO! 'OPENAI_API_KEY' NO encontrada en el nivel superior.")
-
-        # Verificación de la clave de OpenAI anidada
-        if "gcp_service_account" in st.secrets and "api_key" in st.secrets.gcp_service_account:
-            st.warning("¡ALERTA! 'OPENAI_API_KEY' fue encontrada ANIDADA dentro de 'gcp_service_account'. ¡Esto es incorrecto!")
-        
-    except Exception as e:
-        st.error(f"Ocurrió un error al intentar leer los secretos: {e}")
-
-st.markdown("---")
-# =============================================================================='''
 
 # ==============================================================================
 # 2. CONFIGURACIÓN DE LA PÁGINA Y CONSTANTES
