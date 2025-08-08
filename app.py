@@ -50,20 +50,7 @@ TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversió
 # 3. INICIALIZACIÓN DE CLIENTES Y CONEXIONES
 # ==============================================================================
 
-# --- Cliente de OpenAI ---
-# Inicialización más directa y con mensaje de depuración
-client_openai = None
-if st.secrets.get("OPENAI_API_KEY"):
-    try:
-        client_openai = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-        # Mensaje de éxito temporal para depuración (puedes comentarlo después)
-        # st.sidebar.success("Cliente OpenAI inicializado.")
-    except Exception as e:
-        st.sidebar.error(f"Error al inicializar cliente OpenAI: {e}")
-else:
-    # Mensaje de fallo temporal para depuración
-    # st.sidebar.warning("API Key de OpenAI no encontrada en secretos.")
-    pass
+
 
 # --- Conexión a Google Sheets ---
 client_gsheet = conexion_gsheet_produccion()
