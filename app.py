@@ -64,11 +64,11 @@ if submitted:
     notas=notas_gasto
     )
 
-# Mostramos el mensaje de éxito o error
-if exito:
-    st.success(mensaje)
-else:
-    st.error(mensaje)
+    # Mostramos el mensaje de éxito o error
+    if exito:
+        st.success(mensaje)
+    else:
+        st.error(mensaje)
 
 #--- INICIO DEL DASHBOARD ---
 st.header("Análisis y Visualización de Gastos 📈")
