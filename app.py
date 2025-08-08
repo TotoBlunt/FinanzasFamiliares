@@ -51,21 +51,30 @@ TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversió
 # ==============================================================================
 
 # --- Cliente de OpenAI ---
-# Inicialización segura que no rompe la app si la clave no está
-client_openai = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY")) if st.secrets.get("OPENAI_API_KEY") else None
+# Inicialización más directa y con mensaje de depuración
+client_openai = None
+if st.secrets.get("OPENAI_API_KEY"):
+    try:
+        client_openai = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+        # Mensaje de éxito temporal para depuración (puedes comentarlo después)
+        # st.sidebar.success("Cliente OpenAI inicializado.")
+    except Exception as e:
+        st.sidebar.error(f"Error al inicializar cliente OpenAI: {e}")
+else:
+    # Mensaje de fallo temporal para depuración
+    # st.sidebar.warning("API Key de OpenAI no encontrada en secretos.")
+    pass
 
 # --- Conexión a Google Sheets ---
-# La app se detiene si la conexión a la base de datos falla
 client_gsheet = conexion_gsheet_produccion()
 if client_gsheet is None:
-    st.error("No se pudo establecer la conexión principal con Google Sheets. La aplicación no puede continuar.")
+    st.error("No se pudo conectar a Google Sheets. La aplicación no puede continuar.")
     st.stop()
 
 worksheet = abrir_hoja(client_gsheet)
 if worksheet is None:
     st.error("No se pudo abrir la hoja de trabajo. La aplicación no puede continuar.")
     st.stop()
-
 # ==============================================================================
 # 4. CUERPO PRINCIPAL DE LA APLICACIÓN
 # ==============================================================================
