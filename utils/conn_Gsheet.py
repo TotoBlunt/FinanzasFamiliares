@@ -39,9 +39,13 @@ def abrir_hoja(client):
     Abre una hoja de cálculo específica y devuelve el objeto de la hoja.
     Asegúrate de que el nombre de la hoja sea correcto.
     """
-    spreadsheet = client.open("FinanzasFamiliares")  # Cambia por el nombre de tu hoja
-    worksheet = spreadsheet.worksheet("Hoja 1")  # Cambia por el nombre de la pestaña que usarás
-    return worksheet
+    try:
+        spreadsheet = client.open("FinanzasFamiliares")
+        worksheet = spreadsheet.worksheet("Hoja 1")
+        return worksheet
+    except Exception as e:
+        print(f"Error al abrir la hoja: {e}")
+        return None
 
 def cargar_datos(worksheet):
     """
