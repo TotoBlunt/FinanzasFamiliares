@@ -50,7 +50,7 @@ TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversió
 # 3. INICIALIZACIÓN DE CLIENTES Y CONEXIONES
 # ==============================================================================
 
-client_openai = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY")) if st.secrets.get("OPENAI_API_KEY") else None
+client_openai = OpenAI(api_key=st.secrets.openai.api_key) if "openai" in st.secrets and "api_key" in st.secrets.openai else None
 
 # --- Conexión a Google Sheets ---
 client_gsheet = conexion_gsheet_produccion()
