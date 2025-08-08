@@ -1,213 +1,209 @@
+# ==============================================================================
+# 1. IMPORTACIONES
+# ==============================================================================
 import streamlit as st
-from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_datos
-from utils.add_informacion import ingresar_gasto,eliminar_gasto,editar_gasto
-from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal
-from utils.func_dash import graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
+import pandas as pd
 from openai import OpenAI
-from utils.func_openai import sugerir_categoria_ia,generar_resumen_ia
 
-#--- INICIALIZAR CLIENTES ---
-#Cliente de OpenAI
-try:
-    client_openai = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-except Exception as e:
-    # Si la clave no está, no rompemos la app, solo la funcionalidad de IA no estará disponible.
-    client_openai = None
+# Importar funciones desde la carpeta 'utils'
+# Asegúrate de que tu estructura de carpetas es correcta:
+# .
+# ├── app.py
+# └── utils
+#     ├── __init__.py  (un archivo vacío)
+#     ├── conn_Gsheet.py
+#     ├── add_informacion.py
+#     ├── func_dash.py
+#     └── func_openai.py
+#
+from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_datos
+from utils.add_informacion import ingresar_gasto, eliminar_gasto, editar_gasto
+from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal, graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
+from utils.func_openai import sugerir_categoria_ia, generar_resumen_ia
 
-#--- CONEXIÓN A GOOGLE SHEETS ---
-client = conexion_gsheet_produccion()  # Establece la conexión con Google Sheets
-worksheet = abrir_hoja(client)  # Abre la hoja de cálculo específica
+# ==============================================================================
+# 2. CONFIGURACIÓN DE LA PÁGINA Y CONSTANTES
+# ==============================================================================
+st.set_page_config(page_title="Gestor de Finanzas", layout="wide", initial_sidebar_state="expanded")
 
-#--- INTERFAZ DE USUARIO DE STREAMLIT ---
-st.set_page_config(page_title="Gestor de Finanzas", layout="wide")
-st.title("Nuestro Gestor de Finanzas  Familiares 📊")
-#--- Formulario para añadir gastos ---
-with st.form("entry_form_1", clear_on_submit=True):
-    st.header("Añadir un nuevo gasto")
-    # Definir categorías y personas
-    CATEGORIAS = ["Comida", "Hogar", "Transporte", "Ocio", "Salud", "Ropa y Calzado", "Tecnología", "Otro"] 
-    PERSONAS = ["Milagros Valladolid", "Jose Longa"] # Lista de personas que pueden registrar gastos
-    TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversión", "Deuda"]
+# Definir constantes globales para ser usadas en toda la app
+PERSONAS = ["Milagros Valladolid", "Jose Longa"]
+CATEGORIAS = ["Comida", "Hogar", "Transporte", "Ocio", "Salud", "Ropa y Calzado", "Tecnología", "Regalos", "Educación", "Deuda", "Otro"]
+TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversión", "Deuda"]
 
-    # Usaremos columnas para organizar mejor el formulario
-    col1, col2 = st.columns(2)
+# ==============================================================================
+# 3. INICIALIZACIÓN DE CLIENTES Y CONEXIONES
+# ==============================================================================
 
-    with col1:
-        fecha_gasto = st.date_input("Fecha")
-        descripcion_gasto = st.text_input("Descripción (Obligatorio)", placeholder="En que gastaste el dinero?")
-        categoria_gasto = st.selectbox("Categoría", CATEGORIAS)
-        # NUEVO CAMPO: Subcategoría
-        subcategoria_gasto = st.text_input("Subcategoría (Opcional)", placeholder="Ej: Supermercado, Gasolina, Netflix")
+# --- Cliente de OpenAI ---
+# Inicialización segura que no rompe la app si la clave no está
+client_openai = OpenAI(api_key=st.secrets.get("OPENAI_API_KEY")) if st.secrets.get("OPENAI_API_KEY") else None
 
-    with col2:
-        monto_gasto = st.number_input("Monto (Obligatorio)", min_value=0.01, format="%.2f", placeholder="")
-        persona_gasto = st.radio("Pagado por", PERSONAS)
-        # NUEVO CAMPO: Tipo de Gasto
+# --- Conexión a Google Sheets ---
+# La app se detiene si la conexión a la base de datos falla
+client_gsheet = conexion_gsheet_produccion()
+if client_gsheet is None:
+    st.error("No se pudo establecer la conexión principal con Google Sheets. La aplicación no puede continuar.")
+    st.stop()
+
+worksheet = abrir_hoja(client_gsheet)
+if worksheet is None:
+    st.error("No se pudo abrir la hoja de trabajo. La aplicación no puede continuar.")
+    st.stop()
+
+# ==============================================================================
+# 4. CUERPO PRINCIPAL DE LA APLICACIÓN
+# ==============================================================================
+
+# --- TÍTULO ---
+st.title("Nuestro Gestor de Finanzas Familiares 📊")
+st.markdown("Una herramienta para registrar y analizar nuestros gastos diarios.")
+
+# --- FORMULARIO DE INGRESO DE GASTOS ---
+with st.expander("➕ Añadir un nuevo gasto", expanded=True):
+    # Usamos clear_on_submit=False para que la sugerencia de IA no se borre
+    with st.form("entry_form", clear_on_submit=False):
+        col1, col2 = st.columns(2)
+        with col1:
+            fecha_gasto = st.date_input("Fecha")
+            descripcion_gasto = st.text_input("Descripción *", placeholder="Ej: Compra semanal en el supermercado")
+        with col2:
+            monto_gasto = st.number_input("Monto *", min_value=0.01, format="%.2f")
+            persona_gasto = st.radio("Pagado por", PERSONAS)
+
+        # Botón para sugerencia de IA
+        if st.form_submit_button("🤖 Sugerir Categoría con IA"):
+            if descripcion_gasto and client_openai:
+                with st.spinner("Pensando... 🤔"):
+                    sugerencia = sugerir_categoria_ia(descripcion_gasto, CATEGORIAS, client_openai)
+                    if sugerencia:
+                        st.session_state.sugerencia_categoria = sugerencia
+            elif not client_openai:
+                st.warning("Funcionalidad de IA no disponible. Revisa tu API Key.")
+            else:
+                st.warning("Escribe una descripción primero.")
+        
+        # Widget de Categoría que usa la sugerencia del session_state
+        indice_sugerido = 0
+        sugerencia_guardada = st.session_state.get('sugerencia_categoria')
+        if sugerencia_guardada and sugerencia_guardada in CATEGORIAS:
+            indice_sugerido = CATEGORIAS.index(sugerencia_guardada)
+
+        categoria_gasto = st.selectbox("Categoría", CATEGORIAS, index=indice_sugerido)
+        subcategoria_gasto = st.text_input("Subcategoría (Opcional)", placeholder="Ej: Supermercado, Netflix")
         tipo_gasto_seleccionado = st.selectbox("Tipo de Gasto", TIPOS_GASTO)
+        notas_gasto = st.text_area("Notas (Opcional)", placeholder="Añade cualquier detalle extra")
+        
+        # Botón de envío principal
+        submitted_add = st.form_submit_button("✅ Agregar Gasto", type="primary")
 
-    # NUEVO CAMPO: Notas (debajo de las columnas para que ocupe todo el ancho)
-    notas_gasto = st.text_area("Notas (Opcional)", placeholder="Añade cualquier detalle extra aquí")
-
-    submitted = st.form_submit_button("✅ Agregar Gasto")
-#--- Lógica de envío actualizada ---
-if submitted:
-    # Llamamos a nuestra función actualizada, pasándole TODOS los datos del formulario
-    exito, mensaje = ingresar_gasto(
-    worksheet=worksheet,
-    fecha=fecha_gasto,
-    monto=monto_gasto,
-    descripcion=descripcion_gasto,
-    persona=persona_gasto,
-    categoria=categoria_gasto,
-    subcategoria=subcategoria_gasto,
-    tipo_gasto=tipo_gasto_seleccionado,
-    notas=notas_gasto
-    )
-
-    # Mostramos el mensaje de éxito o error
+# Lógica de envío del formulario
+if submitted_add:
+    exito, mensaje = ingresar_gasto(worksheet, fecha_gasto, monto_gasto, descripcion_gasto, persona_gasto,
+                                    categoria_gasto, subcategoria_gasto, tipo_gasto_seleccionado, notas_gasto)
     if exito:
         st.success(mensaje)
+        if 'sugerencia_categoria' in st.session_state:
+            del st.session_state.sugerencia_categoria
+        st.rerun()
     else:
         st.error(mensaje)
 
-#--- INICIO DEL DASHBOARD ---
+
+# --- DASHBOARD ---
+st.markdown("---")
 st.header("Análisis y Visualización de Gastos 📈")
-#Cargar los datos una sola vez
+
 df_original = cargar_datos(worksheet)
 if df_original.empty:
     st.info("Aún no hay datos para mostrar. ¡Agrega tu primer gasto para comenzar!")
     st.stop()
-#--- Configurar filtros en la barra lateral (esto no cambia) ---
+
+# --- Filtros en la barra lateral ---
 st.sidebar.header("Filtros del Dashboard")
 persona_sel = st.sidebar.selectbox("Filtrar por Persona:", ["Ambos"] + list(df_original['Persona'].unique()))
-fecha_sel = st.sidebar.date_input(
-"Filtrar por Rango de Fechas:",
-value=(df_original['Fecha'].min().date(), df_original['Fecha'].max().date()),
-min_value=df_original['Fecha'].min().date(),
-max_value=df_original['Fecha'].max().date()
-)
-categoria_sel = st.sidebar.multiselect(
-"Filtrar por Categoría:",
-options=["Todas"] + list(df_original['Categoria'].unique()),
-default="Todas"
-)
-# Aplicar los filtros
+fecha_sel = st.sidebar.date_input("Filtrar por Rango de Fechas:",
+    value=(df_original['Fecha'].min().date(), df_original['Fecha'].max().date()),
+    min_value=df_original['Fecha'].min().date(), max_value=df_original['Fecha'].max().date())
+categoria_sel = st.sidebar.multiselect("Filtrar por Categoría:",
+    options=["Todas"] + list(df_original['Categoria'].unique()), default="Todas")
+
 df_filtrado = aplicar_filtros(df_original, persona_sel, fecha_sel, categoria_sel)
-#--- INICIO DEL NUEVO LAYOUT DEL DASHBOARD ---
+
+# --- Layout del Dashboard ---
 if df_filtrado.empty:
     st.warning("No se encontraron datos para los filtros seleccionados.")
 else:
-    # --- SECCIÓN 1: RESUMEN GENERAL (KPIs) ---
     mostrar_metricas_clave(df_filtrado)
-
-    # --- SECCIÓN 2: VISUALIZACIONES CLAVE (LADO A LADO) ---
+    
     st.subheader("Visión General de Gastos")
-    col1, col2 = st.columns(2)
-
-    # --- SECCIÓN 3: ANÁLISIS DETALLADO (EN PESTAÑAS) ---
-    st.subheader("Análisis y Gestión")
-
-    with col1:
-        # Llamamos a la función del gráfico de torta
+    col_dash1, col_dash2 = st.columns(2)
+    with col_dash1:
         graficar_distribucion_categoria(df_filtrado)
-
-    with col2:
-        # Llamamos a la función del gráfico de líneas
+    with col_dash2:
         graficar_evolucion_temporal(df_filtrado)
 
-    st.markdown("---") # Separador visual
-
-    # --- SECCIÓN 3: ANÁLISIS DETALLADO (EN PESTAÑAS) ---
-    st.subheader("Análisis Detallado")
-
-    tab1, tab2, tab3, tab4= st.tabs([
-        "👥 Comparativa por Persona", 
-        "🌳 Detalle por Subcategoría", 
-        "📄 Tabla de Datos",
-        "⚙️ Gestionar Gastos"
-    ])
-
-    with tab1:
-        # Llamamos a la función del gráfico de barras por persona
+    st.markdown("---")
+    st.subheader("Análisis Detallado y Gestión")
+    
+    # --- Pestañas del Dashboard ---
+    tabs = st.tabs(["👥 Comparativa", "🌳 Subcategorías", "📄 Tabla", "⚙️ Gestionar Gastos", "🧠 Resumen IA"])
+    
+    with tabs[0]:
         graficar_comparativa_persona(df_filtrado)
-
-    with tab2:
-        # Llamamos a la función del treemap de subcategorías
+    with tabs[1]:
         graficar_detalle_subcategoria(df_filtrado)
-
-    with tab3:
-        # Llamamos a la función que muestra la tabla de datos
+    with tabs[2]:
         mostrar_tabla_detallada(df_filtrado)
-
-    with tab4: # <-- LÓGICA DE LA NUEVA PESTAÑA
+    with tabs[3]:
         st.header("Gestionar Gastos Registrados")
-        st.info("Aquí puedes editar o eliminar los gastos más recientes que coinciden con los filtros aplicados.")
-
-        # ==========================================================
-        # <<<<<<<  SOLUCIÓN: DEFINIR LOS DATOS AQUÍ  >>>>>>>
-        # ==========================================================
-        # 1. Definimos el DataFrame que usaremos para la gestión ANTES de cualquier lógica de UI.
-        # Seleccionamos las columnas más importantes y los 20 gastos más recientes.
         gastos_a_gestionar = df_filtrado.sort_values(by="Fecha", ascending=False).head(20)
-        # ==========================================================
-
         if gastos_a_gestionar.empty:
-            st.info("No hay gastos para gestionar según los filtros actuales.")
+            st.info("No hay gastos para gestionar en la selección actual.")
         else:
-            # 2. Iteramos sobre el DataFrame ya definido.
-            for index, row in gastos_a_gestionar.iterrows():
+            for _, row in gastos_a_gestionar.iterrows():
                 id_gasto = str(row['ID_Gasto'])
-                
-                # Creamos un expander para cada gasto. El título muestra info clave.
-                with st.expander(f"📝 {row['Descripcion']} | 💵 ${row['Monto']:.2f} | 📅 {row['Fecha'].strftime('%d/%m/%Y')}"):
-                    
-                    # 3. Formulario de EDICIÓN dentro del expander
+                with st.expander(f"📝 {row['Descripcion']} | S/ {row['Monto']:.2f} | 📅 {row['Fecha'].strftime('%d/%m/%Y')}"):
                     with st.form(key=f"edit_form_{id_gasto}"):
                         st.write(f"**Editando Gasto ID:** `{id_gasto}`")
                         
-                        col_form1, col_form2 = st.columns(2)
-                        
-                        with col_form1:
+                        form_col1, form_col2 = st.columns(2)
+                        with form_col1:
                             nueva_fecha = st.date_input("Fecha", value=row['Fecha'].date(), key=f"date_{id_gasto}")
                             nuevo_monto = st.number_input("Monto", value=float(row['Monto']), format="%.2f", key=f"monto_{id_gasto}")
                             nueva_categoria = st.selectbox("Categoría", CATEGORIAS, index=CATEGORIAS.index(row['Categoria']) if row['Categoria'] in CATEGORIAS else 0, key=f"cat_{id_gasto}")
-                        
-                        with col_form2:
+                        with form_col2:
                             nueva_descripcion = st.text_input("Descripción", value=row['Descripcion'], key=f"desc_{id_gasto}")
                             nueva_subcategoria = st.text_input("Subcategoría", value=row['Subcategoria'], key=f"subcat_{id_gasto}")
                             nueva_persona = st.selectbox("Persona", PERSONAS, index=PERSONAS.index(row['Persona']) if row['Persona'] in PERSONAS else 0, key=f"pers_{id_gasto}")
 
-                        # Botones de acción del formulario
-                        col_btn1, col_btn2 = st.columns([1, 1])
-                        
-                        with col_btn1:
+                        btn_col1, btn_col2 = st.columns(2)
+                        with btn_col1:
                             submitted_edit = st.form_submit_button("💾 Guardar Cambios")
-                        
-                        with col_btn2:
-                            submitted_delete = st.form_submit_button("🗑️ Eliminar Gasto", help="¡Esta acción es permanente!")
+                        with btn_col2:
+                            submitted_delete = st.form_submit_button("🗑️ Eliminar Gasto")
 
-                    # Lógica para cuando se presiona "Guardar Cambios"
                     if submitted_edit:
-                        datos_actualizados = {
-                            'Fecha': nueva_fecha.strftime('%Y-%m-%d'),
-                            'Monto': nuevo_monto,
-                            'Descripcion': nueva_descripcion,
-                            'Categoria': nueva_categoria,
-                            'Subcategoria': nueva_subcategoria,
-                            'Persona': nueva_persona
-                        }
+                        datos_actualizados = {'Fecha': nueva_fecha.strftime('%Y-%m-%d'), 'Monto': nuevo_monto, 'Descripcion': nueva_descripcion,
+                                              'Categoria': nueva_categoria, 'Subcategoria': nueva_subcategoria, 'Persona': nueva_persona}
                         exito, mensaje = editar_gasto(worksheet, id_gasto, datos_actualizados)
-                        if exito:
-                            st.success(mensaje)
-                            st.rerun()
-                        else:
-                            st.error(mensaje)
+                        if exito: st.success(mensaje); st.rerun()
+                        else: st.error(mensaje)
                     
-                    # Lógica para cuando se presiona "Eliminar Gasto"
                     if submitted_delete:
                         exito, mensaje = eliminar_gasto(worksheet, id_gasto)
-                        if exito:
-                            st.success(mensaje)
-                            st.rerun()
-                        else:
-                            st.error(mensaje)
+                        if exito: st.success(mensaje); st.rerun()
+                        else: st.error(mensaje)
+    
+    with tabs[4]:
+        st.header("Asistente Financiero con IA")
+        st.info("Obtén un análisis y consejos sobre tus gastos para el período seleccionado.")
+        
+        if not client_openai:
+            st.warning("La funcionalidad de IA no está disponible. Revisa tu API Key de OpenAI.")
+        else:
+            if st.button("💡 Generar Resumen y Consejos", type="primary"):
+                with st.spinner("Analizando tus finanzas... ⏳"):
+                    resumen = generar_resumen_ia(df_filtrado, client_openai)
+                    with st.container(border=True):
+                        st.markdown(resumen)
