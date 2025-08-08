@@ -9,7 +9,7 @@ from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_dat
 from utils.add_informacion import ingresar_gasto, eliminar_gasto, editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal, graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
 from utils.func_openai import sugerir_categoria_ia, generar_resumen_ia
-
+'''
 # ==============================================================================
 # DEPURADOR DEFINITIVO DE SECRETOS (Eliminar al finalizar)
 # ==============================================================================
@@ -34,7 +34,7 @@ if st.button("Revelar Estructura de Secretos"):
         st.error(f"Ocurrió un error al intentar leer los secretos: {e}")
 
 st.markdown("---")
-# ==============================================================================
+# =============================================================================='''
 
 # ==============================================================================
 # 2. CONFIGURACIÓN DE LA PÁGINA Y CONSTANTES
