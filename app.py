@@ -11,20 +11,31 @@ from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_di
 from utils.func_openai import sugerir_categoria_ia, generar_resumen_ia
 
 # ==============================================================================
-# LÍNEAS DE DEPURACIÓN TEMPORALES
+# DEPURADOR DEFINITIVO DE SECRETOS (Eliminar al finalizar)
 # ==============================================================================
-st.header("🕵️‍♂️ Depuración de Secretos (Eliminar antes de finalizar)")
-if st.button("Mostrar Secretos"):
-    st.write("Claves encontradas en st.secrets:")
-    # st.secrets se comporta como un diccionario, .keys() nos muestra todas las claves que encontró
-    st.write(st.secrets.keys())
+st.header("🕵️‍♂️ Depurador Definitivo de Secretos")
+if st.button("Revelar Estructura de Secretos"):
+    try:
+        # Esto imprimirá todo el diccionario de secretos que Streamlit está viendo.
+        st.write("Estructura completa de `st.secrets`:")
+        st.write(st.secrets.to_dict())
 
-    # Verificamos si la clave específica existe
-    if "OPENAI_API_KEY" in st.secrets:
-        st.success("¡Éxito! La clave 'OPENAI_API_KEY' fue encontrada.")
-    else:
-        st.error("¡Error! La clave 'OPENAI_API_KEY' NO fue encontrada en los secretos.")
+        # Verificación explícita de la clave de OpenAI en el nivel superior
+        if "OPENAI_API_KEY" in st.secrets:
+            st.success("¡ÉXITO! 'OPENAI_API_KEY' encontrada en el nivel superior.")
+        else:
+            st.error("¡FALLO! 'OPENAI_API_KEY' NO encontrada en el nivel superior.")
+
+        # Verificación de la clave de OpenAI anidada
+        if "gcp_service_account" in st.secrets and "OPENAI_API_KEY" in st.secrets.gcp_service_account:
+            st.warning("¡ALERTA! 'OPENAI_API_KEY' fue encontrada ANIDADA dentro de 'gcp_service_account'. ¡Esto es incorrecto!")
+        
+    except Exception as e:
+        st.error(f"Ocurrió un error al intentar leer los secretos: {e}")
+
 st.markdown("---")
+# ==============================================================================
+
 # ==============================================================================
 # 2. CONFIGURACIÓN DE LA PÁGINA Y CONSTANTES
 # ==============================================================================

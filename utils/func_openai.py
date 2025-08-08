@@ -47,7 +47,7 @@ def generar_resumen_ia(df_filtrado, cliente_openai):
 
     # 1. Calcular métricas clave con Pandas
     gasto_total = df_filtrado['Monto'].sum()
-    gastos_por_categoria = df_filtrado.groupby('Categoría')['Monto'].sum().sort_values(ascending=False)
+    gastos_por_categoria = df_filtrado.groupby('Categoria')['Monto'].sum().sort_values(ascending=False)
     categoria_mayor_gasto = gastos_por_categoria.index[0]
     monto_mayor_gasto = gastos_por_categoria.iloc[0]
 
