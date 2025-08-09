@@ -62,7 +62,7 @@ def generar_resumen_ia(df_filtrado, model):
 
     Usa un tono positivo, motivador y evita el lenguaje técnico. Dirígete a ellos como "ustedes".
     """
-     try:
+    try:
         response = model.generate_content(prompt)
         return response.text
     except Exception as e:
