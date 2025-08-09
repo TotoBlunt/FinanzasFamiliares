@@ -8,7 +8,8 @@ from openai import OpenAI
 from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_datos
 from utils.add_informacion import ingresar_gasto, eliminar_gasto, editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal, graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
-from utils.func_openai import sugerir_categoria_ia, generar_resumen_ia
+from utils.func_ai import inicializar_cliente_ia, sugerir_categoria_ia, generar_resumen_ia
+
 
 
 # ==============================================================================
@@ -25,7 +26,7 @@ TIPOS_GASTO = ["Fijo Mensual", "Variable Diario", "Ocasional", "Ahorro/Inversió
 # 3. INICIALIZACIÓN DE CLIENTES Y CONEXIONES
 # ==============================================================================
 
-client_openai = OpenAI(api_key=st.secrets.openai.api_key) if "openai" in st.secrets and "api_key" in st.secrets.openai else None
+ia_model = inicializar_cliente_ia()
 
 # --- Conexión a Google Sheets ---
 client_gsheet = conexion_gsheet_produccion()
@@ -55,12 +56,13 @@ with st.expander("➕ Añadir un nuevo gasto", expanded=True):
 
         # Botón para sugerencia de IA
         if st.form_submit_button("🤖 Sugerir Categoría con IA"):
-            if descripcion_gasto and client_openai:
+            if descripcion_gasto and ia_model:
                 with st.spinner("Pensando... 🤔"):
-                    sugerencia = sugerir_categoria_ia(descripcion_gasto, CATEGORIAS, client_openai)
+                    sugerencia = sugerir_categoria_ia(descripcion_gasto, CATEGORIAS, ia_model)
+
                     if sugerencia:
                         st.session_state.sugerencia_categoria = sugerencia
-            elif not client_openai:
+            elif not ia_model:
                 st.warning("Funcionalidad de IA no disponible. Revisa tu API Key.")
             else:
                 st.warning("Escribe una descripción primero.")
@@ -181,11 +183,11 @@ else:
         st.header("Asistente Financiero con IA")
         st.info("Obtén un análisis y consejos sobre tus gastos para el período seleccionado.")
         
-        if not client_openai:
-            st.warning("La funcionalidad de IA no está disponible. Revisa tu API Key de OpenAI.")
+        if not ia_model:
+            st.warning("La funcionalidad de IA no está disponible. Revisa tu API Key de Google.")
         else:
             if st.button("💡 Generar Resumen y Consejos", type="primary"):
                 with st.spinner("Analizando tus finanzas... ⏳"):
-                    resumen = generar_resumen_ia(df_filtrado, client_openai)
+                    resumen = generar_resumen_ia(df_filtrado, ia_model)
                     with st.container(border=True):
                         st.markdown(resumen)

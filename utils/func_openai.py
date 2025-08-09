@@ -1,49 +1,44 @@
 import streamlit as st
-def sugerir_categoria_ia(descripcion, categorias_posibles, cliente_openai):
-    """
-    Usa la IA para sugerir una categoría basada en la descripción de un gasto.
-    """
-    if not cliente_openai:
-        return None # Si el cliente no se inicializó, no hacemos nada.
+import google.generativeai as genai
 
-    # Prompt claro y directo para la IA
-    prompt = f"""
-    Dada la siguiente descripción de un gasto: "{descripcion}"
-
-    ¿Cuál de las siguientes categorías es la más apropiada?
-    Categorías disponibles: {', '.join(categorias_posibles)}
-
-    Responde únicamente con el nombre exacto de la categoría de la lista. No añadas explicaciones ni texto adicional.
-    Si ninguna categoría parece apropiada, responde con "Otro".
-    """
+# --- NUEVA FUNCIÓN PARA INICIALIZAR EL CLIENTE ---
+def inicializar_cliente_ia():
+    """Inicializa el cliente de Google Gemini si la clave existe."""
     try:
-        response = cliente_openai.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0, # Queremos la respuesta más predecible
-            max_tokens=15 
-        )
-        sugerencia = response.choices[0].message.content.strip()
-        
-        # Verificamos que la sugerencia esté en nuestra lista de categorías
-        if sugerencia in categorias_posibles:
-            return sugerencia
-        else:
-            return "Otro" # Si la IA devuelve algo inesperado, asignamos "Otro"
-            
+        api_key = st.secrets.google_ai.api_key
+        genai.configure(api_key=api_key)
+        # Seleccionamos el modelo que vamos a usar
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        return model
+    except (AttributeError, KeyError):
+        # Si st.secrets.google_ai.api_key no existe
+        return None
     except Exception as e:
-        st.write(f"Error al llamar a la API de OpenAI para sugerir categoría: {e}")
+        st.write(f"Error al configurar la API de Google Gemini: {e}")
+        return None
+    
+# --- FUNCIONES DE IA ACTUALIZADAS ---
+def sugerir_categoria_ia(descripcion, categorias_posibles, model):
+    """Usa Gemini para sugerir una categoría."""
+    if not model:
         return None
 
-def generar_resumen_ia(df_filtrado, cliente_openai):
-    """
-    Analiza un DataFrame de gastos y genera un resumen y consejos con IA.
-    """
-    if not cliente_openai:
-        return "La funcionalidad de IA no está disponible. Revisa la configuración de la API Key."
-        
+    prompt = f"""Dada la descripción de un gasto: "{descripcion}", ¿cuál de estas categorías es la más apropiada? Categorías disponibles: {', '.join(categorias_posibles)}. Responde únicamente con el nombre exacto de la categoría. Si ninguna encaja, responde 'Otro'."""
+    try:
+        response = model.generate_content(prompt)
+        sugerencia = response.text.strip()
+        return sugerencia if sugerencia in categorias_posibles else "Otro"
+    except Exception as e:
+        st.write(f"Error al llamar a la API de Gemini para sugerir categoría: {e}")
+        return None
+
+
+def generar_resumen_ia(df_filtrado, model):
+    """Usa Gemini para generar un resumen financiero."""
+    if not model:
+        return "La funcionalidad de IA no está disponible."
     if df_filtrado.empty:
-        return "No hay datos suficientes en el período seleccionado para generar un resumen."
+        return "No hay datos suficientes para generar un resumen."
 
     # 1. Calcular métricas clave con Pandas
     gasto_total = df_filtrado['Monto'].sum()
@@ -67,14 +62,10 @@ def generar_resumen_ia(df_filtrado, cliente_openai):
 
     Usa un tono positivo, motivador y evita el lenguaje técnico. Dirígete a ellos como "ustedes".
     """
-
-    try:
-        response = cliente_openai.chat.completions.create(
-            model="gpt-4o-mini", # Mejor para análisis y redacción
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.7, # Permite un poco de creatividad en la redacción
-        )
-        return response.choices[0].message.content
+     try:
+        response = model.generate_content(prompt)
+        return response.text
     except Exception as e:
-        st.write(f"Error al llamar a la API de OpenAI para generar resumen: {e}")
-        return "Ocurrió un error al intentar generar el resumen. Por favor, inténtalo de nuevo más tarde."
+        st.write(f"Error al llamar a la API de Gemini para generar resumen: {e}")
+        return "Ocurrió un error al intentar generar el resumen."
+    
