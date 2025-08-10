@@ -8,7 +8,7 @@ from openai import OpenAI
 from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_datos
 from utils.add_informacion import ingresar_gasto, eliminar_gasto, editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal, graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
-from utils.func_ai import inicializar_cliente_ia, sugerir_categoria_ia, generar_resumen_ia
+from utils.func_ai import inicializar_cliente_ia, sugerir_categoria_ia, generar_resumen_ia,generar_insights_proactivos
 
 
 
@@ -118,7 +118,28 @@ df_filtrado = aplicar_filtros(df_original, persona_sel, fecha_sel, categoria_sel
 if df_filtrado.empty:
     st.warning("No se encontraron datos para los filtros seleccionados.")
 else:
+    # --- SECCIÓN 1: RESUMEN GENERAL (KPIs) ---
     mostrar_metricas_clave(df_filtrado)
+    # ==========================================================
+    # <<<<<<<<<<<<<<<    NUEVA SECCIÓN DE INSIGHTS    >>>>>>>>>>>>>>>>>
+    # ==========================================================
+    st.subheader("💡 Insights Proactivos")
+    
+    # Llamamos a nuestra nueva función de IA con los datos filtrados
+    with st.spinner("Buscando patrones interesantes en tus gastos..."):
+        insights = generar_insights_proactivos(df_filtrado, ia_model)
+    
+    if insights:
+        # Mostramos los insights en columnas para que se vea como tarjetas
+        cols = st.columns(len(insights))
+        for i, insight in enumerate(insights):
+            with cols[i]:
+                st.info(insight, icon="🧠") # st.info le da un fondo azulado bonito
+    # ==========================================================
+
+    st.markdown("---") # Separador visual
+
+    # --- SECCIÓN 2: VISUALIZACIONES CLAVE ---
     
     st.subheader("Visión General de Gastos")
     col_dash1, col_dash2 = st.columns(2)
