@@ -1,11 +1,11 @@
 # Asistente Financiero Inteligente para Parejas 🤖📊
 
-< -->
- 
+ <img width="1062" height="1673" alt="Captura de pantalla 2025-08-09 222651" src="https://github.com/user-attachments/assets/5a8c33f7-6a40-48be-9b40-503213521998" />
+
 
 Una aplicación web avanzada, construida con Streamlit y Python, diseñada para transformar la gestión de finanzas en pareja. No solo registra y visualiza gastos, sino que utiliza **Inteligencia Artificial (Google Gemini)** para actuar como un verdadero asistente financiero, ofreciendo insights, resúmenes y una interfaz de chat para dialogar con tus datos.
 
-**[➡️ Ver la aplicación en vivo]** <!-- Reemplaza esto con el enlace a tu app desplegada en Streamlit Cloud -->
+**[➡️ Ver la aplicación en vivo]** 
 
 ---
 
