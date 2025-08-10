@@ -169,7 +169,7 @@ def responder_pregunta_financiera(pregunta_usuario, df, ia_model):
         response_codigo = ia_model.generate_content(prompt_generar_codigo)
         codigo_generado = response_codigo.text.strip()
     except Exception as e:
-        print(f"Error al generar código: {e}")
+        st.write(f"Error al generar código: {e}")
         return "Tuve un problema al intentar entender tu pregunta. ¿Podrías reformularla?"
         
     # ==========================================================
@@ -191,7 +191,7 @@ def responder_pregunta_financiera(pregunta_usuario, df, ia_model):
         exec(codigo_limpio, {}, local_scope)
         resultado_ejecucion = local_scope.get('resultado', 'No se encontró la variable resultado.')
     except Exception as e:
-        print(f"Error al ejecutar código: {e}\nCódigo problemático (limpio):\n{codigo_limpio}")
+        st.write(f"Error al ejecutar código: {e}\nCódigo problemático (limpio):\n{codigo_limpio}")
         return f"No pude procesar tu solicitud. Parece que la pregunta generó un cálculo inválido."
 
     # --- PASO 3: Interpretar el resultado y generar respuesta final ---
