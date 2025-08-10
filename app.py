@@ -8,7 +8,7 @@ from openai import OpenAI
 from utils.conn_Gsheet import conexion_gsheet_produccion, abrir_hoja, cargar_datos
 from utils.add_informacion import ingresar_gasto, eliminar_gasto, editar_gasto
 from utils.func_dash import aplicar_filtros, mostrar_metricas_clave, graficar_distribucion_categoria, graficar_evolucion_temporal, graficar_comparativa_persona, graficar_detalle_subcategoria, mostrar_tabla_detallada
-from utils.func_ai import inicializar_cliente_ia, sugerir_categoria_ia, generar_resumen_ia,generar_insights_proactivos
+from utils.func_ai import inicializar_cliente_ia, sugerir_categoria_ia, generar_resumen_ia,generar_insights_proactivos, responder_pregunta_financiera
 
 
 
@@ -212,3 +212,36 @@ else:
                     resumen = generar_resumen_ia(df_filtrado, ia_model)
                     with st.container(border=True):
                         st.markdown(resumen)
+    
+    # ==========================================================
+    # <<<<<<<<<<<<<<<    NUEVA PESTAÑA DE CHAT    >>>>>>>>>>>>>>>>>
+    # ==========================================================
+    with tabs[5]:
+        st.header("💬 Chatea con tus Finanzas")
+        st.info("Haz preguntas en lenguaje natural sobre los datos del período seleccionado en los filtros.")
+
+        # Inicializar el historial del chat en el estado de la sesión si no existe
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        # Mostrar mensajes del historial en cada re-ejecución
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+        # Aceptar la entrada del usuario
+        if prompt := st.chat_input("Ej: ¿Cuál fue el gasto total en Comida?"):
+            # Añadir el mensaje del usuario al historial y mostrarlo
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
+
+            # Generar y mostrar la respuesta del asistente
+            with st.chat_message("assistant"):
+                with st.spinner("Consultando al analista financiero..."):
+                    # Llamamos a nuestra nueva y potente función de IA
+                    respuesta = responder_pregunta_financiera(prompt, df_filtrado, ia_model)
+                    st.markdown(respuesta)
+            
+            # Añadir la respuesta del asistente al historial
+            st.session_state.messages.append({"role": "assistant", "content": respuesta})

@@ -136,3 +136,75 @@ def generar_insights_proactivos(df, ia_model):
     except Exception as e:
         st.write(f"Error al generar insights proactivos con IA: {e}")
         return ["Ocurrió un error al analizar las tendencias."]
+
+def responder_pregunta_financiera(pregunta_usuario, df, ia_model):
+    """
+    Procesa una pregunta en lenguaje natural, la convierte a código pandas,
+    la ejecuta y devuelve una respuesta en lenguaje natural.
+    """
+    if not ia_model: return "La funcionalidad de IA no está disponible."
+    if df.empty: return "No hay datos disponibles para responder preguntas."
+
+    # Preparamos información sobre el DataFrame para darle contexto a la IA
+    columnas = df.columns.tolist()
+    tipos_de_datos = df.dtypes.to_string()
+    
+    # --- PASO 1: Generar el código Pandas ---
+    prompt_generar_codigo = f"""
+    Actúa como un experto en Python y la librería Pandas. Tu tarea es convertir una pregunta del usuario en código Pandas ejecutable.
+    
+    El DataFrame se llama `df` y tiene las siguientes columnas: {columnas}
+    Los tipos de datos de las columnas son:
+    {tipos_de_datos}
+    
+    La pregunta del usuario es: "{pregunta_usuario}"
+    
+    Escribe el código de Python Pandas que calcule la respuesta a esa pregunta.
+    - El resultado final del código debe ser almacenado en una variable llamada `resultado`.
+    - `resultado` puede ser un número, un string, una lista o un DataFrame de Pandas.
+    - No incluyas la importación de pandas ni la creación del DataFrame.
+    - Responde únicamente con el bloque de código. No añadas explicaciones ni ```python.
+    
+    Ejemplo de pregunta: '¿cuál fue el gasto total?'
+    Ejemplo de código de respuesta:
+    resultado = df['Monto'].sum()
+    """
+    
+    try:
+        response_codigo = ia_model.generate_content(prompt_generar_codigo)
+        codigo_generado = response_codigo.text.strip()
+    except Exception as e:
+        st.write(f"Error al generar código: {e}")
+        return "Tuve un problema al intentar entender tu pregunta. ¿Podrías reformularla?"
+        
+    # --- PASO 2: Ejecutar el código de forma segura ---
+    resultado_ejecucion = None
+    try:
+        # Creamos un entorno de ejecución limitado y seguro
+        local_scope = {'df': df}
+        exec(codigo_generado, {}, local_scope)
+        resultado_ejecucion = local_scope.get('resultado', 'No se encontró la variable resultado.')
+    except Exception as e:
+        st.write(f"Error al ejecutar código: {e}\nCódigo problemático:\n{codigo_generado}")
+        return f"No pude procesar tu solicitud. Parece que la pregunta generó un cálculo inválido."
+
+    # --- PASO 3: Interpretar el resultado y generar respuesta final ---
+    prompt_interpretar_resultado = f"""
+    Eres un asistente financiero amigable. Un usuario hizo la siguiente pregunta: "{pregunta_usuario}"
+    
+    Para responder, se ejecutó un cálculo que dio el siguiente resultado:
+    {str(resultado_ejecucion)}
+    
+    Tu tarea es presentar este resultado al usuario de una manera clara, concisa y en lenguaje natural.
+    - Si el resultado es un número, formatéalo como moneda si es apropiado.
+    - Si es una tabla, preséntala de forma resumida.
+    - Si es un error, explícalo de forma sencilla.
+    - Sé breve y directo en tu respuesta.
+    """
+    
+    try:
+        response_final = ia_model.generate_content(prompt_interpretar_resultado)
+        return response_final.text.strip()
+    except Exception as e:
+        st.write(f"Error al interpretar resultado: {e}")
+        return f"El resultado del cálculo fue: {str(resultado_ejecucion)}, pero tuve problemas para explicarlo."
