@@ -1,145 +1,115 @@
-# Gestor Financiero Avanzado para Parejas 📊
+# Asistente Financiero Inteligente para Parejas 🤖📊
 
-<!-- Reemplaza el enlace con una captura de pantalla de tu dashboard finalizado -->
+< -->
  
 
-Herramienta completa para la gestión de finanzas personales en pareja, construida con Python y Streamlit. Permite un registro detallado de gastos y ofrece un dashboard interactivo para un análisis profundo, con toda la información centralizada en Google Sheets.
+Una aplicación web avanzada, construida con Streamlit y Python, diseñada para transformar la gestión de finanzas en pareja. No solo registra y visualiza gastos, sino que utiliza **Inteligencia Artificial (Google Gemini)** para actuar como un verdadero asistente financiero, ofreciendo insights, resúmenes y una interfaz de chat para dialogar con tus datos.
 
-[➡️ Ver la aplicación en vivo] <img width="1040" height="1707" alt="image" src="https://github.com/user-attachments/assets/5c257647-9954-4353-b56e-bfb863fa72f2" />
-
-
+**[➡️ Ver la aplicación en vivo]** <!-- Reemplaza esto con el enlace a tu app desplegada en Streamlit Cloud -->
 
 ---
 
-## ✨ Características
+## ✨ Características Principales
 
-*   **Gestión CRUD Completa:** Permite **C**rear, **L**eer, **A**ctualizar y **E**liminar (CRUD) gastos de forma intuitiva.
-*   **Formulario de Ingreso Detallado:** Añade nuevos gastos con campos para fecha, descripción, monto, categoría, subcategoría, persona y notas.
-*   **Dashboard Interactivo:**
-    *   **KPIs Principales:** Visión general inmediata del gasto total, número de transacciones y promedio.
-    *   **Gráficos Dinámicos:** Gráfico de torta para la distribución por categoría y gráfico de líneas para la evolución temporal.
-    *   **Análisis en Pestañas:** Desglose por persona, análisis por subcategoría (Treemap) y tabla de datos completa.
-*   **Edición y Eliminación Segura:** Interfaz dedicada para modificar o eliminar registros con pasos de confirmación para evitar errores.
-*   **Filtros Globales:** Filtra todo el dashboard por rango de fechas, persona o categoría para análisis específicos.
-*   **Base de Datos en la Nube:** Utiliza Google Sheets como una base de datos gratuita y accesible.
-*   **Despliegue Seguro:** Configurado para un despliegue seguro en Streamlit Community Cloud, protegiendo las credenciales con `st.secrets`.
+*   **Gestión de Gastos Completa (CRUD):** Permite **C**rear, **L**eer, **A**ctualizar y **E**liminar gastos de forma segura e intuitiva.
+*   **Base de Datos en la Nube:** Utiliza Google Sheets como backend, garantizando accesibilidad y coste cero.
+*   **Dashboard Interactivo:** Un centro de control visual con filtros potentes para analizar los datos por persona, fecha y categoría.
 
----
+### 🚀 Funcionalidades Potenciadas por IA
 
-## 🛠️ Arquitectura y Desglose de Funciones
-
-El proyecto está modularizado para ser escalable y fácil de mantener. Cada función tiene una única responsabilidad.
-
-### Funciones de Backend (Manejo de Datos)
-
-*   `conexion_gsheet_produccion()`: Establece la conexión segura con la API de Google Sheets utilizando las credenciales almacenadas en los secretos de Streamlit. Está diseñada para el entorno de producción.
-*   `ingresar_gasto(...)`: Toma los datos de un nuevo gasto desde el formulario y los añade como una nueva fila en la hoja de cálculo.
-*   `editar_gasto(...)`: Busca una fila existente por su `ID_Gasto`, recibe un diccionario con los nuevos datos y actualiza las celdas correspondientes de forma eficiente (en lote).
-*   `eliminar_gasto(...)`: Busca una fila por su `ID_Gasto` y la elimina por completo de la hoja de cálculo.
-
-### Funciones de Frontend y Lógica del Dashboard
-
-*   `cargar_datos(...)`: Lee todos los registros de Google Sheets, los convierte en un DataFrame de Pandas, limpia los datos (convierte tipos, maneja valores nulos) y fuerza que `ID_Gasto` sea un string. Utiliza `@st.cache_data` para mejorar el rendimiento.
-*   `aplicar_filtros(...)`: Recibe el DataFrame principal y las selecciones del usuario en la barra lateral, y devuelve un nuevo DataFrame filtrado que se usará en todas las visualizaciones.
-*   `mostrar_metricas_clave(...)`: Calcula y muestra los KPIs (Gasto Total, etc.) en la parte superior del dashboard.
-*   `graficar_* (...)`: Cada una de las funciones `graficar_distribucion_categoria`, `graficar_evolucion_temporal`, etc., se especializa en crear y mostrar un gráfico específico usando Plotly, a partir del DataFrame filtrado.
+*   **Categorización Asistida:** Al ingresar un gasto, la IA sugiere la categoría más probable basándose en la descripción, agilizando el proceso.
+*   **💡 Insights Proactivos:** La aplicación analiza tus patrones de gasto y presenta "tarjetas de información" con tendencias y observaciones interesantes que podrías haber pasado por alto.
+*   **🧠 Resúmenes Inteligentes:** Genera resúmenes en lenguaje natural sobre tu salud financiera en un período, destacando aciertos, áreas de mejora y consejos prácticos.
+*   **💬 Chat con tus Finanzas:** ¡Habla con tus datos! Una interfaz de chat te permite hacer preguntas en español como `"¿Cuánto gastamos en restaurantes el mes pasado?"` y recibir respuestas instantáneas.
 
 ---
 
-## 🚀 Guía de Configuración y Despliegue (Desde Cero)
+## 🛠️ Arquitectura del Proyecto
+
+El proyecto está diseñado de forma modular para garantizar su mantenimiento y escalabilidad.
+
+*   **`app.py`:** Orquesta la interfaz de usuario (UI) y el flujo de la aplicación.
+*   **`utils/`:** Una carpeta que contiene la lógica de negocio separada:
+    *   `conn_Gsheet.py`: Gestiona la conexión segura a Google Sheets.
+    *   `add_informacion.py`: Contiene las funciones CRUD (ingresar, editar, eliminar).
+    *   `func_dash.py`: Alberga las funciones que generan los gráficos y métricas del dashboard.
+    *   `func_ai.py`: Contiene toda la lógica para interactuar con la API de Google Gemini, incluyendo la generación de código y la interpretación de resultados.
+
+---
+
+## 🚀 Guía de Configuración y Despliegue
 
 Sigue estos pasos para poner en marcha tu propia versión de la aplicación.
 
-### **Paso 1: Configuración de Google Sheets (La Base de Datos)**
+### **Paso 1: Configuración de Google Sheets (Base de Datos)**
 
-1.  **Crear la Hoja de Cálculo:**
-    *   Ve a [Google Sheets](https://sheets.google.com) y crea una nueva hoja de cálculo.
-    *   Nómbrala exactamente `Finanzas Familiares`.
+1.  **Crear Hoja:** Ve a [Google Sheets](https://sheets.google.com) y crea una hoja llamada `Finanzas Familiares`.
+2.  **Definir Columnas:** En la primera fila, crea las siguientes columnas en este orden: `ID_Gasto`, `Fecha`, `Monto`, `Descripcion`, `Persona`, `Categoria`, `Subcategoria`, `Tipo de Gasto`, `Notas`.
 
-2.  **Definir las Columnas:**
-    *   En la primera fila de la primera hoja (normalmente `Hoja 1`), crea las siguientes columnas en este orden exacto. El nombre debe ser idéntico.
+### **Paso 2: Configuración de Google Cloud (Permisos para Google Sheets)**
 
-| A | B | C | D | E | F | G | H | I |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `ID_Gasto` | `Fecha` | `Monto`| `Descripción` | `Persona` | `Categoría` | `Subcategoría` | `Tipo de Gasto` | `Notas` |
+1.  **Habilitar APIs:** En la [Consola de Google Cloud](https://console.cloud.google.com/), crea un proyecto y habilita la **"Google Drive API"** y la **"Google Sheets API"**.
+2.  **Crear Cuenta de Servicio:** En `Credenciales`, crea una `Cuenta de servicio` con el rol de `Editor`. Descarga la clave en formato `JSON`.
+3.  **Compartir Hoja:** Abre tu hoja de Google Sheets, haz clic en `Compartir` y añade el email de la cuenta de servicio (`client_email` del archivo JSON) como "Editor".
 
-### **Paso 2: Configuración de Google Cloud (Permisos y Credenciales)**
+### **Paso 3: Configuración de Google AI Studio (API de Gemini)**
 
-1.  **Crear un Proyecto y Habilitar APIs:**
-    *   Ve a la [Consola de Google Cloud](https://console.cloud.google.com/).
-    *   Crea un nuevo proyecto (ej. "App Finanzas Streamlit").
-    *   En el buscador, busca y habilita las siguientes dos APIs: **"Google Drive API"** y **"Google Sheets API"**.
+1.  **Obtener Clave de API:** Ve a [Google AI Studio](https://aistudio.google.com/), inicia sesión y haz clic en `Get API key` > `Create API key in new project`.
+2.  **Copia tu nueva clave de API.** La necesitarás para los secretos.
 
-2.  **Crear una Cuenta de Servicio y Clave JSON:**
-    *   En el menú de navegación, ve a `APIs y servicios > Credenciales`.
-    *   Haz clic en `+ CREAR CREDENCIALES` y selecciona `Cuenta de servicio`.
-    *   Dale un nombre (ej. `streamlit-finanzas-bot`) y haz clic en `CREAR Y CONTINUAR`.
-    *   En "Rol", busca y selecciona `Editor`. Haz clic en `CONTINUAR` y luego en `LISTO`.
-    *   Serás devuelto a la pantalla de credenciales. Haz clic en el email de la cuenta de servicio que acabas de crear.
-    *   Ve a la pestaña `CLAVES`, haz clic en `AGREGAR CLAVE` > `Crear nueva clave`.
-    *   Selecciona `JSON` y haz clic en `CREAR`. Un archivo `.json` se descargará automáticamente. **Guarda este archivo, es tu contraseña.**
+### **Paso 4: Preparar y Desplegar en Streamlit Cloud**
 
-### **Paso 3: Conceder Permisos a la Hoja de Cálculo**
-
-1.  Abre el archivo `.json` que descargaste. Busca y copia el valor de `client_email`. Se verá algo así: `streamlit-finanzas-bot@tu-proyecto.iam.gserviceaccount.com`.
-2.  Vuelve a tu hoja de Google Sheets, haz clic en el botón `Compartir` (arriba a la derecha).
-3.  Pega el `client_email` en el campo para añadir personas, asegúrate de que tenga el rol de **Editor** y haz clic en `Enviar`.
-
-### **Paso 4: Preparar el Repositorio para el Despliegue**
-
-1.  **Clona este repositorio o crea el tuyo:**
-    ```bash
-    git clone https://github.com/[tu-usuario]/[tu-repositorio].git
-    cd [tu-repositorio]
-    ```
-
-2.  **Crea el archivo `requirements.txt`:**
-    Este archivo le dice a Streamlit qué librerías instalar. Debe contener:
-    ```txt
-    streamlit
-    pandas
-    gspread
-    oauth2client
-    plotly
-    ```
-
-
-3.  **Sube tu código a GitHub:**
-    Añade todos tus archivos (`app.py`, `requirements.txt`, `.gitignore`, `README.md`) y súbelos a tu repositorio de GitHub.
-
-### **Paso 5: Despliegue en Streamlit Community Cloud**
-
-1.  Ve a [share.streamlit.io](https://share.streamlit.io/) e inicia sesión con tu cuenta de GitHub.
-2.  Haz clic en `New app` y selecciona tu repositorio.
-3.  Antes de desplegar, haz clic en `Advanced settings...`.
-4.  Ve a la sección `Secrets`. Aquí copiarás el contenido de tu archivo `.json` de credenciales, pero con formato TOML:
+1.  **Clona el repositorio** y asegúrate de tener los archivos `app.py`, `requirements.txt` y la carpeta `utils`.
+2.  **Configura tus Secretos:** En tu dashboard de Streamlit Cloud, ve a `Settings` > `Secrets` de tu app y pega el siguiente contenido, reemplazando los valores con tus credenciales.
 
     ```toml
+    # secrets.toml
+
+    # --- Sección de Google Cloud para Google Sheets ---
     [gcp_service_account]
     type = "service_account"
     project_id = "tu-project-id"
-    private_key_id = "tu-private-key-id"
-    private_key = "-----BEGIN PRIVATE KEY-----\n...todo el contenido...\n-----END PRIVATE KEY-----\n"
-    client_email = "tu-client-email@..."
-    client_id = "tu-client-id"
-    auth_uri = "https://accounts.google.com/o/oauth2/auth"
-    token_uri = "https://oauth2.googleapis.com/token"
-    auth_provider_x509_cert_url = "https://www.googleapis.com/oauth2/v1/certs"
-    client_x509_cert_url = "https://www.googleapis.com/..."
+    # ... (pega aquí el resto de tu JSON de la cuenta de servicio) ...
+
+    # --- Sección de Google AI para Gemini ---
+    [google_ai]
+    api_key = "PEGA-AQUI-TU-CLAVE-DE-GEMINI"
     ```
-5.  Haz clic en `Save` y luego en `Deploy!`. ¡Tu aplicación estará en línea y funcionando en minutos!
+3.  **Despliega la aplicación.** Streamlit se encargará de instalar las dependencias y ejecutar la app.
+
+---
+
+## 💰 Costes y Límites de la API de IA (Google Gemini)
+
+Esta aplicación utiliza la API de Google Gemini, que tiene una estructura de precios muy asequible y un generoso nivel gratuito.
+
+### Límites del Nivel Gratuito (Sin Facturación Habilitada)
+
+*   **Límite Diario:** **50 solicitudes por día** para el modelo `gemini-1.5-flash`.
+*   **Importante:** Cada pregunta en la función de "Chat con tus Gastos" consume **2 solicitudes** (una para generar el código y otra para interpretar la respuesta). Por lo tanto, el límite diario es de aproximadamente **25 preguntas de chat**.
+*   Si alcanzas este límite, recibirás un error `Error 429: Quota exceeded` y deberás esperar 24 horas para que se reinicie.
+
+### Uso con Facturación Habilitada (Recomendado)
+
+Para un uso sin interrupciones, se recomienda habilitar la facturación en tu proyecto de Google Cloud.
+
+*   **¿Significa que pagaré?** No necesariamente. Habilitar la facturación te da acceso a un **nivel gratuito mucho más grande** antes de empezar a pagar.
+*   **Costes Reales:** El modelo `gemini-1.5-flash` es extremadamente barato. El coste se mide por cada 1,000,000 de tokens (un token es ~¾ de una palabra).
+    *   **Entrada (tus prompts):** ~$0.35 por millón de tokens.
+    *   **Salida (respuestas de la IA):** ~$1.05 por millón de tokens.
+*   **Estimación Práctica:** Con un uso intensivo (cientos de interacciones de chat y resúmenes al mes), el coste mensual probablemente será de **unos pocos céntimos o, como mucho, un par de dólares**. Un presupuesto de $5 al mes es más que suficiente para un uso sin preocupaciones.
 
 ---
 
 ## 🔮 Roadmap de Futuras Mejoras
 
-*   [ ] **Gestión de Presupuestos:** Definir límites de gasto por categoría y visualizar el progreso.
-*   [ ] **Categorización con IA:** Sugerir categorías automáticamente a partir de la descripción del gasto.
-*   [ ] **Autenticación de Usuarios:** Añadir un sistema de login para que solo tú y tu esposa puedan acceder.
-*   [ ] **Soporte Multimoneda:** Para registrar gastos en diferentes divisas.
+*   [ ] **Autenticación de Usuarios:** Implementar un sistema de login para una experiencia personalizada.
+*   [ ] **Gestión de Presupuestos:** Definir presupuestos por categoría y visualizar el progreso.
+*   [ ] **Notificaciones:** Enviar resúmenes o alertas a través de Telegram o email.
+*   [ ] **Soporte Multilenguaje:** Adaptar la aplicación para otros idiomas.
 
 ---
 
 ## 📜 Licencia
 
-Este proyecto está distribuido bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
+Este proyecto está distribuido bajo la Licencia MIT. Consulta el archivo `LICENSE` para más detalles.
