@@ -129,7 +129,7 @@ def generar_insights_proactivos(df, ia_model):
     """
     
     try:
-        response = model.generate_content(prompt)
+        response = ia_model.generate_content(prompt)
         # Dividimos la respuesta de la IA en una lista de insights
         insights_finales = [line.strip() for line in response.text.strip().split('\n') if line.strip()]
         return insights_finales
