@@ -152,7 +152,7 @@ else:
     st.subheader("Análisis Detallado y Gestión")
     
     # --- Pestañas del Dashboard ---
-    tabs = st.tabs(["👥 Comparativa", "🌳 Subcategorías", "📄 Tabla", "⚙️ Gestionar Gastos", "🧠 Resumen IA"])
+    tabs = st.tabs(["👥 Comparativa", "🌳 Subcategorías", "📄 Tabla", "⚙️ Gestionar Gastos", "🧠 Resumen IA","💬 Chat con tus Gastos"])
     
     with tabs[0]:
         graficar_comparativa_persona(df_filtrado)
