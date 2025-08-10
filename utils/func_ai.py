@@ -119,13 +119,13 @@ def generar_insights_proactivos(df, ia_model):
     Datos extraídos:
     - {insights_texto}
 
-    Tu tarea es seleccionar los DOS insights más interesantes o útiles de esta lista y reescribirlos como dos frases cortas, amigables y fáciles de entender. Cada frase debe empezar con un emoji apropiado.
+    Tu tarea es seleccionar los TRES insights más interesantes o útiles de esta lista y reescribirlos como tres frases cortas, amigables y fáciles de entender. Cada frase debe empezar con un emoji apropiado.
     
     Ejemplo de formato:
     - 💡 ¿Sabías que los sábados son su día de mayor gasto? ¡Parece que disfrutan el fin de semana!
     - 🍽️ El mayor porcentaje de sus gastos se destina a la categoría 'Comida', representando casi la mitad de su presupuesto.
 
-    No añadas introducciones ni conclusiones, solo las dos frases. Separa cada frase con un salto de línea.
+    No añadas introducciones ni conclusiones, solo las tres frases. Separa cada frase con un salto de línea.
     """
     
     try:
