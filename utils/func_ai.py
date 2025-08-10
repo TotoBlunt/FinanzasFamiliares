@@ -153,39 +153,45 @@ def responder_pregunta_financiera(pregunta_usuario, df, ia_model):
     prompt_generar_codigo = f"""
     Actúa como un experto en Python y la librería Pandas. Tu tarea es convertir una pregunta del usuario en código Pandas ejecutable.
     
-    El DataFrame se llama `df` y tiene las siguientes columnas: {columnas}
+    El DataFrame se llama `df` y tiene las siguientes columnas: {df.columns.tolist()}
     Los tipos de datos de las columnas son:
-    {tipos_de_datos}
+    {df.dtypes.to_string()}
     
     La pregunta del usuario es: "{pregunta_usuario}"
     
-    Escribe el código de Python Pandas que calcule la respuesta a esa pregunta.
-    - El resultado final del código debe ser almacenado en una variable llamada `resultado`.
-    - `resultado` puede ser un número, un string, una lista o un DataFrame de Pandas.
-    - No incluyas la importación de pandas ni la creación del DataFrame.
+    Escribe el código de Python Pandas que calcule la respuesta.
+    - El resultado final debe ser almacenado en una variable llamada `resultado`.
+    - No incluyas la importación de pandas.
     - Responde únicamente con el bloque de código. No añadas explicaciones ni ```python.
-    
-    Ejemplo de pregunta: '¿cuál fue el gasto total?'
-    Ejemplo de código de respuesta:
-    resultado = df['Monto'].sum()
     """
     
     try:
         response_codigo = ia_model.generate_content(prompt_generar_codigo)
         codigo_generado = response_codigo.text.strip()
     except Exception as e:
-        st.write(f"Error al generar código: {e}")
+        print(f"Error al generar código: {e}")
         return "Tuve un problema al intentar entender tu pregunta. ¿Podrías reformularla?"
+        
+    # ==========================================================
+    # <<<<<<<<<<<<<<<    NUEVO PASO DE LIMPIEZA    >>>>>>>>>>>>>>>>>
+    # ==========================================================
+    # Eliminamos cualquier línea que intente importar librerías o que sea un comentario de markdown.
+    lineas_limpias = []
+    for linea in codigo_generado.split('\n'):
+        if not linea.strip().startswith('import ') and not linea.strip().startswith('```'):
+            lineas_limpias.append(linea)
+    codigo_limpio = "\n".join(lineas_limpias)
+    # ==========================================================
         
     # --- PASO 2: Ejecutar el código de forma segura ---
     resultado_ejecucion = None
     try:
-        # Creamos un entorno de ejecución limitado y seguro
-        local_scope = {'df': df}
-        exec(codigo_generado, {}, local_scope)
+        # Usamos el CÓDIGO LIMPIO para la ejecución
+        local_scope = {'df': df, 'pd': pd} # <-- AÑADIMOS 'pd' AL ENTORNO
+        exec(codigo_limpio, {}, local_scope)
         resultado_ejecucion = local_scope.get('resultado', 'No se encontró la variable resultado.')
     except Exception as e:
-        st.write(f"Error al ejecutar código: {e}\nCódigo problemático:\n{codigo_generado}")
+        print(f"Error al ejecutar código: {e}\nCódigo problemático (limpio):\n{codigo_limpio}")
         return f"No pude procesar tu solicitud. Parece que la pregunta generó un cálculo inválido."
 
     # --- PASO 3: Interpretar el resultado y generar respuesta final ---
