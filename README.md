@@ -5,7 +5,7 @@
 
 Una aplicación web avanzada, construida con Streamlit y Python, diseñada para transformar la gestión de finanzas en pareja. No solo registra y visualiza gastos, sino que utiliza **Inteligencia Artificial (Google Gemini)** para actuar como un verdadero asistente financiero, ofreciendo insights, resúmenes y una interfaz de chat para dialogar con tus datos.
 
-**[➡️ Ver la aplicación en vivo]** 
+**[➡️ Ver la aplicación en vivo]** [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://finanzasfamiliares.streamlit.app/)
 
 ---
 
